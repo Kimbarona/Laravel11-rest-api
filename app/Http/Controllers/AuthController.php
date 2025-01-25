@@ -12,23 +12,21 @@ use Symfony\Component\HttpFoundation\Response;
 class AuthController extends Controller
 {
     public function login(LoginAuthRequest $request){
+        $validatedCredentials = $request->validated();
+        $user = User::where("email", $validatedCredentials["email"])->first();
 
-        return response()->json('Hello');
-        // $validatedCredentials = $request->validated();
-        // $user = User::where("email", $validatedCredentials["email"])->first();
+        return response()->json($user);
 
-        // return response()->json($user);
-
-        // if(!$user || !Hash::check($request->password, $user->password)){
-        //     return response()->json(["message"=> "The provided credentials are incorrect"], Response::HTTP_FORBIDDEN);
-        // }
+        if(!$user || !Hash::check($request->password, $user->password)){
+            return response()->json(["message"=> "The provided credentials are incorrect"], Response::HTTP_FORBIDDEN);
+        }
         
-        // $token = $user->createToken($request->name)->plainTextToken;
+        $token = $user->createToken($request->name)->plainTextToken;
 
-        // return response()->json([
-        //     "user" => $user,
-        //     "token"=> $token,
-        // ], Response::HTTP_OK);
+        return response()->json([
+            "user" => $user,
+            "token"=> $token,
+        ], Response::HTTP_OK);
     }
 
     public function register(RegisterAuthRequest $request){
